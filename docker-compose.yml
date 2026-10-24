@@ -1,0 +1,42 @@
+
+services:
+  orchestrator:
+    build: .
+    command: uvicorn orchestrator.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "8000:8000"
+    env_file: .env
+    environment:
+      ANALYTICS_URL: http://analytics:8001
+      INSIGHTS_URL: http://insights:8002
+      REPORTING_URL: http://reporting:8003
+      OUTPUT_DIR: /app/output
+    volumes:
+      - "./output:/app/output"
+    depends_on:
+      - analytics
+      - insights
+      - reporting
+
+  analytics:
+    build: .
+    command: uvicorn analytics.main:app --host 0.0.0.0 --port 8001
+    ports:
+      - "8001:8001"
+
+  insights:
+    build: .
+    command: uvicorn insights.main:app --host 0.0.0.0 --port 8002
+    ports:
+      - "8002:8002"
+    env_file: .env
+
+  reporting:
+    build: .
+    command: uvicorn reporting.main:app --host 0.0.0.0 --port 8003
+    ports:
+      - "8003:8003"
+    environment:
+      OUTPUT_DIR: /app/output
+    volumes:
+      - "./output:/app/output"
